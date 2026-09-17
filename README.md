@@ -3,6 +3,10 @@
 Interface für den Juice Shop: Bestand der Säfte, der Rohstoffe und des Saatguts, mit
 Herstellung und lückenloser Bewegungshistorie.
 
+> **Zum Weiterbauen:** [HANDOVER.md](HANDOVER.md) beschreibt die fachlichen Invarianten, das
+> Datenmodell, den API-Kontrakt und welche Dateien sich beim Einbau in eine andere Anwendung
+> unverändert übernehmen lassen. Dort anfangen, nicht hier.
+
 ## Aufbau
 
 npm-Workspaces-Monorepo, gleiches Prinzip wie `gta-map`:
