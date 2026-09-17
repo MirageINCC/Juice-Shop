@@ -69,10 +69,22 @@ Der Container führt beim Start `prisma migrate deploy` aus, der Server stellt d
 Warenkatalog sicher und nimmt erst dann Anfragen an. Schema- und Katalogänderungen kommen
 also mit dem Deploy von selbst mit, ohne Handgriff im Container.
 
-> **Achtung:** `mittwald_stack_deploy` ersetzt den **kompletten** Stack. Was in der
-> übergebenen Compose-Datei fehlt, wird gelöscht — inklusive Volumes. Vor jeder Änderung
-> den bestehenden Stand auslesen und die Änderung hineinmergen, nie eine Teilkonfiguration
-> schicken.
+> **Achtung — der Stack ist geteilt.** Das Projekt hat genau *einen* Stack (`default`), und
+> darin läuft auch die **gta-map**. `mittwald_stack_deploy` ersetzt den **kompletten** Stack:
+> was in der übergebenen Compose-Datei fehlt, wird gelöscht, inklusive Volumes.
+>
+> Vor jeder Änderung deshalb zwingend den Ist-Zustand auslesen und die eigene Änderung
+> hineinmergen — mit `revealEnvironmentVariables=true`, sonst schickt man die Geheimnisse
+> der Karte als `[REDACTED]` zurück und leert sie damit:
+>
+> ```
+> mittwald_stack_list projectId=p-i0wsnq revealEnvironmentVariables=true
+> ```
+>
+> Bleiben die Felder eines Dienstes unverändert, lässt Mittwald dessen Container in Ruhe
+> (gleiche Container-ID, `requiresRecreate: false`). Das ist wichtig, weil der Virtualhost
+> von `grand.covern.cloud` den gta-map-Container **per ID** adressiert — eine Neuanlage
+> würde die Karte offline nehmen. Nach jedem Deploy `grand.covern.cloud` gegenprüfen.
 
 ### Secrets
 
@@ -91,8 +103,20 @@ benutzbar, und eine Artikeländerung kommt mit dem nächsten Deploy von selbst m
 
 ## Domain
 
-Virtualhost für `juice.covern.cloud`, Pfad `/` → Container `app`, Port 3000. TLS verwaltet
-Mittwald selbst.
+Der Virtualhost `juice.covern.cloud` existiert im Projekt bereits, DNS und TLS verwaltet
+Mittwald. Er muss auf Pfad `/` → Container **`juice-app` (`c-n1g7p5`)**, Port **3000**
+zeigen.
+
+**Das geht nur in mStudio, nicht über die API.** `mittwald_domain_virtualhost_create`
+antwortet mit `403 PermissionDenied` — auch für einen bereits existierenden Hostnamen, also
+eine Rechte- und keine Namensfrage. Ein Update-Endpunkt existiert nicht, und Löschen wäre
+eine Einbahnstraße: neu anlegen ginge mit demselben 403 nicht mehr. Den Virtualhost daher
+**nicht** über die API löschen.
+
+In mStudio: *Domains → juice.covern.cloud → Ziel* auf den Container `juice-app`, Port 3000.
+
+Die Domain `covern.cloud` selbst liegt nicht in diesem Projekt — `mittwald_domain_list` für
+`p-i0wsnq` liefert nichts. Die Virtualhosts zeigen projektübergreifend darauf.
 
 ## Discord-App
 
@@ -129,11 +153,23 @@ Discord-Server tragen oft Bot-eigene Integrationsrollen mit unscheinbaren Namen,
 oberflächlich wie Adminrollen aussehen. Bei der gta-map war deshalb einmal die
 Bot-Integrationsrolle statt der Admin-Rolle eingetragen.
 
+## Container
+
+| Dienst | Short-ID | Rolle |
+|---|---|---|
+| `juice-app` | `c-n1g7p5` | Juice Shop |
+| `juice-postgres` | `c-r1ban6` | dessen Datenbank, Volume `juice-pgdata` |
+| `app` | `c-qz18dm` | gta-map — **nicht anfassen** |
+| `postgres` | `c-t48jr5` | dessen Datenbank, Volume `pgdata` |
+
+Die beiden Anwendungen teilen sich nur den Stack, nicht die Datenbank: eigener
+Postgres-Dienst, eigenes Volume, eigene Zugangsdaten.
+
 ## Versionen
 
 | Version | Commit | Digest | Deployed |
 |---|---|---|---|
-| — | `bf74ce6` | `sha256:07525d18e0f11d5221d7338664d7ca32292cd6d9f7deacbb9df49f2a4634ce11` | noch nicht |
+| — | `3928169` | `sha256:bdde5e3fbe835a5ffd3b7b6733e3bae0e347edeb0fa81892a7a5ed41fa72be60` | 2026-09-17, läuft |
 
 Nach jedem bestätigten stabilen Stand einen annotierten Git-Tag `vX.Y` setzen und hier
 eintragen — so ist jeder historische Zustand aus Code *und* Image wiederherstellbar.
