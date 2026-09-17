@@ -169,7 +169,7 @@ Postgres-Dienst, eigenes Volume, eigene Zugangsdaten.
 
 | Version | Commit | Digest | Deployed |
 |---|---|---|---|
-| — | `3928169` | `sha256:bdde5e3fbe835a5ffd3b7b6733e3bae0e347edeb0fa81892a7a5ed41fa72be60` | 2026-09-17, läuft |
+| `v1.0` | `ccc016f` | `sha256:db2466e3ce783a802499b9780efe2707b2a05e3d4682f2e88798894c142133d1` | 2026-09-17, läuft |
 
 Nach jedem bestätigten stabilen Stand einen annotierten Git-Tag `vX.Y` setzen und hier
 eintragen — so ist jeder historische Zustand aus Code *und* Image wiederherstellbar.
