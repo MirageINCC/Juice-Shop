@@ -28,7 +28,10 @@ FROM node:22-alpine AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 COPY --from=prod-deps /app/node_modules node_modules
-COPY --from=prod-deps /app/package.json package.json
+# server/package.json, nicht das Root-Manifest: nur dort steht "type": "module".
+# Mit dem Root-Manifest muss Node dist/index.js als CommonJS anparsen, scheitern und als
+# ES-Modul neu einlesen (MODULE_TYPELESS_PACKAGE_JSON).
+COPY --from=prod-deps /app/server/package.json package.json
 COPY --from=server-build /app/server/dist dist
 COPY --from=server-build /app/server/prisma prisma
 COPY --from=client-build /app/client/dist public
