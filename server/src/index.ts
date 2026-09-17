@@ -2,6 +2,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import cookieParser from "cookie-parser";
 import express from "express";
+import { ensureCatalog } from "./catalog.js";
 import { env } from "./env.js";
 import { HttpError } from "./httpError.js";
 import { authRouter } from "./routes/auth.js";
@@ -47,4 +48,13 @@ app.use(
   },
 );
 
-app.listen(env.PORT, () => console.log(`juice-shop server lauscht auf :${env.PORT}`));
+// Erst den Katalog sicherstellen, dann annehmen — sonst könnte der erste Aufruf nach
+// einem frischen Deploy auf eine leere Artikelliste treffen.
+ensureCatalog()
+  .then(() => {
+    app.listen(env.PORT, () => console.log(`juice-shop server lauscht auf :${env.PORT}`));
+  })
+  .catch((error) => {
+    console.error("Katalog konnte nicht angelegt werden:", error);
+    process.exit(1);
+  });

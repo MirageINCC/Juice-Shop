@@ -46,9 +46,9 @@ Mutation erneut auf dem Server statt.
 npm install
 cp .env.example .env          # Werte eintragen, siehe unten
 npm run dev:db                # Postgres im Container
-cd server && npx prisma migrate dev && npx prisma db seed
+cd server && npx prisma migrate dev
 
-npm run dev:server            # :3000
+npm run dev:server            # :3000, legt den Warenkatalog beim Start selbst an
 npm run dev:client            # :5173  ← im Browser öffnen, nicht :3000
 ```
 

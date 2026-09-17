@@ -1,10 +1,9 @@
-import { ItemKind, PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { ItemKind } from "@prisma/client";
+import { prisma } from "./db.js";
 
 /**
- * Der Warenkatalog. `slug` ist der Schlüssel: er verbindet den Datensatz mit der
- * Bilddatei aus assets-src/ und mit dem Rezept in src/recipe.ts.
+ * Der Warenkatalog. `slug` ist der Schlüssel: er verbindet den Datensatz mit der Bilddatei
+ * aus assets-src/ und mit dem Rezept in recipe.ts.
  */
 const CATALOG: { slug: string; name: string; kind: ItemKind }[] = [
   { slug: "angriffssaft-10", name: "Angriffs Saft 10%", kind: ItemKind.JUICE },
@@ -34,26 +33,24 @@ const FOLDER: Record<ItemKind, string> = {
   [ItemKind.SEED]: "seeds",
 };
 
-async function main() {
-  let order = 0;
+/**
+ * Legt den Katalog an bzw. zieht ihn nach. Läuft bei jedem Serverstart.
+ *
+ * Der Katalog ist feste Stammdaten, ohne die die App nichts anzuzeigen hätte — kein
+ * Einrichtungsschritt, den man vergessen können soll. `upsert` auf `slug` macht den Aufruf
+ * wiederholbar: Namen, Bildpfade und Reihenfolge werden nachgezogen, der gepflegte Bestand
+ * bleibt unangetastet.
+ */
+export async function ensureCatalog(): Promise<void> {
+  let sortOrder = 0;
   for (const entry of CATALOG) {
     const imagePath = `/assets/${FOLDER[entry.kind]}/${entry.slug}.png`;
-    const sortOrder = order++;
-
-    // upsert statt create: ein erneuter Deploy darf Namen und Reihenfolge nachziehen,
-    // aber niemals den gepflegten Bestand zurücksetzen.
+    const order = sortOrder++;
     await prisma.item.upsert({
       where: { slug: entry.slug },
-      create: { ...entry, imagePath, sortOrder },
-      update: { name: entry.name, kind: entry.kind, imagePath, sortOrder },
+      create: { ...entry, imagePath, sortOrder: order },
+      update: { name: entry.name, kind: entry.kind, imagePath, sortOrder: order },
     });
   }
-  console.log(`Katalog eingespielt: ${CATALOG.length} Artikel.`);
+  console.log(`Katalog bereit: ${CATALOG.length} Artikel.`);
 }
-
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  })
-  .finally(() => prisma.$disconnect());

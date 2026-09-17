@@ -65,8 +65,9 @@ volumes:
   pgdata:
 ```
 
-Der Container führt beim Start `prisma migrate deploy` aus und startet erst danach den
-Server — Schemaänderungen kommen also mit dem Deploy von selbst mit.
+Der Container führt beim Start `prisma migrate deploy` aus, der Server stellt danach den
+Warenkatalog sicher und nimmt erst dann Anfragen an. Schema- und Katalogänderungen kommen
+also mit dem Deploy von selbst mit, ohne Handgriff im Container.
 
 > **Achtung:** `mittwald_stack_deploy` ersetzt den **kompletten** Stack. Was in der
 > übergebenen Compose-Datei fehlt, wird gelöscht — inklusive Volumes. Vor jeder Änderung
@@ -81,18 +82,12 @@ Repository. `.env` ist in `.gitignore`.
 Ein Wechsel von `SESSION_SECRET` macht alle bestehenden Cookies ungültig und meldet damit
 sämtliche Benutzer ab. Beim Umzug auf einen neuen Stack den Wert mitnehmen.
 
-## Katalog einspielen
+## Warenkatalog
 
-Die Migration legt leere Tabellen an; der Warenkatalog kommt aus dem Seed. Einmalig nach dem
-ersten Deploy:
-
-```bash
-# im app-Container
-npx prisma db seed
-```
-
-Der Seed arbeitet mit `upsert` auf `slug` — er darf jederzeit erneut laufen. Namen, Bildpfade
-und Reihenfolge werden nachgezogen, der gepflegte Bestand bleibt unangetastet.
+Es gibt keinen manuellen Seed-Schritt. Die Migration legt die Tabellen an, und der Server
+stellt beim Start den Katalog aus `server/src/catalog.ts` per `upsert` auf `slug` sicher —
+wiederholbar, ohne gepflegte Bestände anzufassen. Ein frischer Deploy ist damit sofort
+benutzbar, und eine Artikeländerung kommt mit dem nächsten Deploy von selbst mit.
 
 ## Domain
 
