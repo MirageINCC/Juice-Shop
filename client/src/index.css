@@ -1,0 +1,89 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Die Tokens stehen bewusst auf :root UND .dark. Die shadcn-Komponenten tragen
+ * dark:-Varianten; ohne den .dark-Selektor würden diese Zweige still auf ihre
+ * Hell-Variante zurückfallen. Ein Light-Theme gibt es nicht — <html> trägt .dark fest.
+ */
+:root,
+.dark {
+  --background: #08090b;
+  --foreground: #ffffff;
+  --card: #101316;
+  --card-foreground: #ffffff;
+  --popover: #101316;
+  --popover-foreground: #ffffff;
+  --primary: #2ee6a8;
+  /* Mint ist hell — Schrift darauf muss dunkel sein, sonst ist der Button unlesbar. */
+  --primary-foreground: #04120d;
+  --secondary: rgba(255, 255, 255, 0.04);
+  --secondary-foreground: #ffffff;
+  --muted: rgba(255, 255, 255, 0.04);
+  --muted-foreground: rgba(255, 255, 255, 0.6);
+  --accent: rgba(46, 230, 168, 0.12);
+  --accent-foreground: #ffffff;
+  --destructive: #f2555f;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: rgba(255, 255, 255, 0.12);
+  --ring: #2ee6a8;
+  --radius: 0.625rem;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Marken-Extras ohne shadcn-Entsprechung, als echte Utilities: bg-panel, shadow-glass, text-brand … */
+@theme {
+  --default-font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --color-brand: #2ee6a8;
+  --color-brand-light: #7ef2cd;
+  --background-image-panel: linear-gradient(145deg, rgba(18, 26, 26, 0.92), rgba(6, 9, 10, 0.96));
+  --shadow-glass: 0 20px 55px rgba(0, 0, 0, 0.55), 0 0 30px rgba(46, 230, 168, 0.1);
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 12% 8%, rgba(46, 230, 168, 0.1), transparent 32%),
+      radial-gradient(circle at 88% 4%, rgba(46, 230, 168, 0.06), transparent 30%),
+      var(--background);
+    color: var(--foreground);
+  }
+
+  * {
+    border-color: var(--border);
+  }
+}
