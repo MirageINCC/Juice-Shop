@@ -1,7 +1,7 @@
 # Deployment
 
 Der Juice Shop läuft als Container-Stack im Mittwald-Projekt **„Grönd" (`p-i0wsnq`)** —
-demselben Projekt wie die gta-map.
+demselben Projekt wie die gta-map — und ist unter **https://juice.covern.cloud** erreichbar.
 
 ## Wie das Image entsteht
 
@@ -54,7 +54,7 @@ services:
       SESSION_SECRET: <geheim, mind. 16 Zeichen>
       DISCORD_CLIENT_ID: <…>
       DISCORD_CLIENT_SECRET: <…>
-      DISCORD_REDIRECT_URI: https://<subdomain>/auth/discord/callback
+      DISCORD_REDIRECT_URI: https://juice.covern.cloud/auth/discord/callback
       DISCORD_BOT_TOKEN: <…>
       DISCORD_GUILD_ID: <…>
       ADMIN_ROLE_IDS: <kommagetrennt>
@@ -96,11 +96,43 @@ und Reihenfolge werden nachgezogen, der gepflegte Bestand bleibt unangetastet.
 
 ## Domain
 
-Virtualhost auf die gewünschte Subdomain, Pfad `/` → Container `app`, Port 3000. TLS
-verwaltet Mittwald selbst.
+Virtualhost für `juice.covern.cloud`, Pfad `/` → Container `app`, Port 3000. TLS verwaltet
+Mittwald selbst.
 
-Die Subdomain muss anschließend in der Discord-App als Redirect-URI eingetragen **und** in
-`DISCORD_REDIRECT_URI` gesetzt werden — beide Seiten müssen exakt übereinstimmen.
+## Discord-App
+
+Der Juice Shop bekommt eine **eigene** Discord-App, nicht die der gta-map. Discord bietet
+keine API zum Anlegen von Anwendungen — die folgenden Schritte gehen nur von Hand über
+https://discord.com/developers/applications:
+
+1. **New Application** anlegen, Name z. B. „Juice Shop Lager".
+2. Unter **OAuth2**: `CLIENT ID` und ein neu erzeugtes `CLIENT SECRET` notieren. Als
+   **Redirect** genau diese beiden Einträge hinterlegen — die Produktions-URI und die
+   lokale, sonst funktioniert jeweils die andere Seite nicht:
+   - `https://juice.covern.cloud/auth/discord/callback`
+   - `http://localhost:5173/auth/discord/callback`
+3. Unter **Bot**: Bot anlegen und das Token notieren. Es wird nur gebraucht, um beim Login
+   die Rollen eines Benutzers nachzuschlagen — es sind keine privilegierten Intents nötig,
+   nur der Gateway-Intent `Guilds`, den der Server selbst anfordert.
+4. Den Bot über **OAuth2 → URL Generator** (Scope `bot`, keine weiteren Rechte) auf den
+   Server einladen. Ohne Mitgliedschaft in der Guild kann er keine Rollen lesen, und
+   niemand bekäme Adminrechte.
+5. `DISCORD_GUILD_ID` ist die ID des Servers (Rechtsklick auf den Server → „ID kopieren",
+   setzt den Entwicklermodus voraus).
+
+### `ADMIN_ROLE_IDS` gegenprüfen, nicht raten
+
+Die IDs vor dem Eintragen mit dem Bot-Token abfragen und anhand der Namen auswählen:
+
+```bash
+curl -s -H "Authorization: Bot <BOT_TOKEN>" \
+  https://discord.com/api/v10/guilds/<GUILD_ID>/roles \
+  | python3 -c "import json,sys; [print(r['id'], r['name']) for r in json.load(sys.stdin)]"
+```
+
+Discord-Server tragen oft Bot-eigene Integrationsrollen mit unscheinbaren Namen, deren IDs
+oberflächlich wie Adminrollen aussehen. Bei der gta-map war deshalb einmal die
+Bot-Integrationsrolle statt der Admin-Rolle eingetragen.
 
 ## Versionen
 
