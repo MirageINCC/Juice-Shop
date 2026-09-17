@@ -171,5 +171,9 @@ Postgres-Dienst, eigenes Volume, eigene Zugangsdaten.
 |---|---|---|---|
 | `v1.0` | `ccc016f` | `sha256:db2466e3ce783a802499b9780efe2707b2a05e3d4682f2e88798894c142133d1` | 2026-09-17, läuft |
 
+Der Tag `v1.0` sitzt auf `fff8067`, dem Nachfolger von `ccc016f`; die beiden unterscheiden
+sich nur um diese Tabellenzeile. Ausgeliefert wird das Image aus `ccc016f` — der Code ist
+identisch, nur die Dokumentation kam danach hinzu.
+
 Nach jedem bestätigten stabilen Stand einen annotierten Git-Tag `vX.Y` setzen und hier
 eintragen — so ist jeder historische Zustand aus Code *und* Image wiederherstellbar.
